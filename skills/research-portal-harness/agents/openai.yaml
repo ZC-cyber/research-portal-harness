@@ -1,0 +1,8 @@
+interface:
+  display_name: "Research Portal Harness"
+  short_description: "Connect subscribed research portals locally"
+  brand_color: "#2563EB"
+  default_prompt: "Use $research-portal-harness to connect my subscribed broker research portals to a local download, dedupe, and indexing workflow."
+policy:
+  allow_implicit_invocation: true
+

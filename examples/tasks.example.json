@@ -1,0 +1,15 @@
+{
+  "tasks": [
+    {
+      "id": "ai_networking_optics",
+      "description": "Example task for AI networking and optical transceiver research.",
+      "tickers": ["MRVL", "ANET", "LITE", "COHR"],
+      "company_terms": ["Marvell", "Arista", "Lumentum", "Coherent"],
+      "industry_terms": ["AI networking", "optical transceiver", "800G", "1.6T"],
+      "file_types": ["pdf", "xlsx", "xlsm"],
+      "date_range_days": 730,
+      "max_downloads_per_portal": 25
+    }
+  ]
+}
+

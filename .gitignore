@@ -1,0 +1,29 @@
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Local harness runtime state. Do not commit user data or sessions.
+data/
+downloads/
+tmp/
+output/
+logs/
+browser_profiles/
+*.sqlite
+*.sqlite3
+*.db
+
+# Real portal configs may contain personal paths or session-bearing URLs.
+config/*.json
+!examples/*.json
+
+# Research artifacts.
+*.pdf
+*.xls
+*.xlsx
+*.xlsm
+*.csv
+*.zip
+
