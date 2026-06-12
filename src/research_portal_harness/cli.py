@@ -8,9 +8,12 @@ from urllib.parse import urlparse
 import typer
 
 from .common import url_allowed, write_json
+from .doctor import diagnose_workspace
 from .indexer import index_downloads, status as status_report
+from .mock_portal import run_mock_portal
 from .portal import discover, fetch as fetch_portal, login as login_portal
-from .workspace import get_broker, get_task, init_workspace, load_brokers, upsert_broker
+from .safety import has_safety_ack, write_safety_ack
+from .workspace import get_broker, get_task, init_workspace, load_brokers, save_brokers, upsert_broker
 
 app = typer.Typer(help="Research Portal Harness execution CLI.")
 
@@ -25,6 +28,46 @@ def init(workspace: Path = typer.Argument(..., help="Workspace directory to crea
     created = init_workspace(workspace)
     for path in created:
         typer.echo(f"created: {path}")
+
+
+@app.command("safety-ack")
+def safety_ack(
+    workspace: Optional[Path] = typer.Option(None, "--workspace", "-w", help="Workspace root."),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Acknowledge without prompting."),
+) -> None:
+    """Record the first-run safety acknowledgement."""
+    root = _root(workspace)
+    typer.echo("Safety acknowledgement:")
+    typer.echo("- I will only acquire research materials I am entitled to access.")
+    typer.echo("- I will not paste passwords, one-time codes, cookies, or session tokens into chat.")
+    typer.echo("- I will not bypass access controls, CAPTCHA, paywalls, entitlement checks, or rate limits.")
+    typer.echo("- I am responsible for following my portal licenses and compliance rules.")
+    if not yes and not typer.confirm("Acknowledge these terms?"):
+        raise typer.Exit(1)
+    path = write_safety_ack(root)
+    typer.echo(f"wrote: {path}")
+
+
+@app.command()
+def setup(
+    workspace: Path = typer.Option(..., "--workspace", "-w", help="Workspace root."),
+    portal_id: str = typer.Option(..., "--portal-id", help="Stable lowercase portal id."),
+    name: str = typer.Option(..., "--name", help="Human-readable portal name."),
+    login_url: str = typer.Option(..., "--login-url", help="Official login or portal URL."),
+    allowed_domain: list[str] = typer.Option(None, "--allowed-domain", help="Allowed domain. May be repeated."),
+    acknowledge_safety: bool = typer.Option(False, "--acknowledge-safety", help="Record safety acknowledgement."),
+) -> None:
+    """Initialize workspace and add the first portal in one command."""
+    init_workspace(workspace)
+    root = _root(workspace)
+    if acknowledge_safety and not has_safety_ack(root):
+        write_safety_ack(root)
+    add_portal(portal_id, name=name, login_url=login_url, allowed_domain=allowed_domain, workspace=root)
+    typer.echo("")
+    typer.echo("Next:")
+    typer.echo(f"  rph doctor {portal_id} --workspace {root}")
+    typer.echo(f"  rph login {portal_id} --workspace {root}")
+    typer.echo(f"  rph search {portal_id} --task example_research_task --workspace {root}")
 
 
 @app.command("add-portal")
@@ -115,6 +158,9 @@ def fetch(
 ) -> None:
     """Download candidate PDFs, models, financial data, and exports."""
     root = _root(workspace)
+    if not dry_run and not has_safety_ack(root):
+        typer.echo("Safety acknowledgement missing. Run `rph safety-ack --workspace <workspace>` first.", err=True)
+        raise typer.Exit(2)
     broker = get_broker(root, portal_id)
     task = get_task(root, task_id) if task_id else None
     result = fetch_portal(root, broker, task, dry_run=dry_run, max_downloads=max_downloads, headless=headless)
@@ -163,6 +209,52 @@ def list_portals(workspace: Optional[Path] = typer.Option(None, "--workspace", "
         typer.echo(f"{broker.get('id')} | {enabled} | {domains}")
 
 
+@app.command()
+def doctor(
+    portal_id: Optional[str] = typer.Argument(None, help="Optional portal id to diagnose."),
+    workspace: Optional[Path] = typer.Option(None, "--workspace", "-w", help="Workspace root."),
+    json_output: bool = typer.Option(False, "--json", help="Print JSON."),
+) -> None:
+    """Diagnose workspace and portal recipe readiness."""
+    root = _root(workspace)
+    report = diagnose_workspace(root, portal_id)
+    if json_output:
+        typer.echo(json.dumps(report, indent=2))
+        return
+    for pid, checks in report["portals"].items():
+        typer.echo(f"{pid}:")
+        for check in checks:
+            typer.echo(f"  {check['status'].upper():4} {check['check']}: {check['detail']}")
+
+
+@app.command("smoke-test")
+def smoke_test(workspace: Optional[Path] = typer.Option(None, "--workspace", "-w", help="Workspace root.")) -> None:
+    """Run an end-to-end local mock portal test."""
+    root = _root(workspace or Path("/tmp/rph-smoke-workspace"))
+    init_workspace(root)
+    write_safety_ack(root)
+    with run_mock_portal() as base_url:
+        portal_id = "mock_research"
+        add_portal(
+            portal_id,
+            name="Mock Research Portal",
+            login_url=f"{base_url}/research",
+            allowed_domain=["127.0.0.1"],
+            workspace=root,
+        )
+        config = load_brokers(root)
+        for broker in config["brokers"]:
+            if broker.get("id") == portal_id:
+                broker["manual_login"] = False
+                broker["auth_success_url_patterns"] = ["research"]
+        save_brokers(root, config)
+        result = fetch_portal(root, get_broker(root, portal_id), get_task(root, "example_research_task"), max_downloads=10, headless=True)
+        index_path = index_downloads(root, "example_research_task")
+        report = status_report(root, "example_research_task")
+    typer.echo(json.dumps({"fetch": result.__dict__, "index_path": str(index_path), "status": report}, indent=2))
+    if result.downloaded < 3 or report["indexed_documents"] < 3:
+        raise typer.Exit(1)
+
+
 if __name__ == "__main__":
     app()
-

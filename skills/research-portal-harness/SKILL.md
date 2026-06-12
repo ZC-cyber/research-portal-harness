@@ -92,12 +92,20 @@ When this skill is used inside an existing acquisition workspace, prefer its loc
 
 ```bash
 rph init <workspace>
-rph add-portal <portal_id> --name "<Portal Name>" --login-url "<official_url>" --allowed-domain "<domain>" --workspace <workspace>
+rph safety-ack --workspace <workspace>
+rph setup --workspace <workspace> --portal-id <portal_id> --name "<Portal Name>" --login-url "<official_url>" --allowed-domain "<domain>" --acknowledge-safety
+rph doctor <portal_id> --workspace <workspace>
 rph login <portal_id> --workspace <workspace>
 rph search <portal_id> --task <task_id> --workspace <workspace>
 rph fetch <portal_id> --task <task_id> --workspace <workspace> --max-downloads 10
 rph index --task <task_id> --workspace <workspace>
 rph status --task <task_id> --workspace <workspace>
+```
+
+Before connecting real subscriptions, run:
+
+```bash
+rph smoke-test
 ```
 
 If an older workspace has custom scripts, prefer them when they already encode portal-specific logic:

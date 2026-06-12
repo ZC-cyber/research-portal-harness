@@ -90,11 +90,15 @@ Example:
 
 ```bash
 rph init ~/research-portal-workspace
-rph add-portal bernstein_research \
+rph safety-ack --workspace ~/research-portal-workspace
+rph setup \
+  --workspace ~/research-portal-workspace \
+  --portal-id bernstein_research \
   --name "Bernstein Research" \
   --login-url "https://research.example.com/login" \
   --allowed-domain "example.com" \
-  --workspace ~/research-portal-workspace
+  --acknowledge-safety
+rph doctor bernstein_research --workspace ~/research-portal-workspace
 rph login bernstein_research --workspace ~/research-portal-workspace
 rph search bernstein_research --task example_research_task --workspace ~/research-portal-workspace
 rph fetch bernstein_research --task example_research_task --workspace ~/research-portal-workspace --max-downloads 10
@@ -103,6 +107,12 @@ rph status --task example_research_task --workspace ~/research-portal-workspace
 ```
 
 This generic downloader is link-based. Portals that hide downloads behind viewer APIs, JavaScript-only buttons, or entitlement-specific document endpoints may need portal-specific recipe extensions.
+
+Run the local end-to-end mock portal before connecting real subscriptions:
+
+```bash
+rph smoke-test
+```
 
 Use `examples/brokers.example.json` and `examples/tasks.example.json` as sanitized starting points. Do not commit real browser profiles, downloaded research, personal manifests, or session-bearing URLs.
 

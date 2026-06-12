@@ -61,6 +61,13 @@ For a standalone workspace:
 
 ```bash
 rph init ~/research-portal-workspace
+rph safety-ack --workspace ~/research-portal-workspace
+```
+
+Before touching a real portal, verify the local execution layer:
+
+```bash
+rph smoke-test
 ```
 
 For the existing repo, use the current repo root and preserve existing `config/`, `data/`, and `scripts/`.
@@ -76,6 +83,13 @@ Offer the grouped list from `SKILL.md`. For each selected portal, collect:
 - Download budget for the first run.
 
 Do not collect passwords, one-time codes, recovery codes, cookies, or exported browser profiles.
+
+Use the guided setup command when the user already has the official URL:
+
+```bash
+rph setup --workspace <workspace> --portal-id <portal_id> --name "<Portal Name>" --login-url "<official_url>" --allowed-domain "<domain>" --acknowledge-safety
+rph doctor <portal_id> --workspace <workspace>
+```
 
 ## 5. Login-Only Pass
 
