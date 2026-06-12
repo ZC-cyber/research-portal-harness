@@ -20,6 +20,12 @@ Run:
 python3 skills/research-portal-harness/scripts/check_environment.py
 ```
 
+Before running a real browser-download workflow, run the stricter runtime check:
+
+```bash
+python3 skills/research-portal-harness/scripts/check_environment.py --strict-runtime
+```
+
 If Playwright browsers are missing, install Chromium:
 
 ```bash
@@ -34,7 +40,7 @@ uv venv --python 3.11
 source .venv/bin/activate
 ```
 
-For an existing Python acquisition workspace, install editable dependencies from that workspace root:
+For an existing Python acquisition workspace with its own `pyproject.toml`, install editable dependencies from that workspace root:
 
 ```bash
 python3 -m pip install -e ".[dev]"

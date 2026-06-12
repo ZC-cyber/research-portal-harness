@@ -33,7 +33,7 @@ Data platforms:
 Codex:
 
 ```bash
-git clone https://github.com/<your-org>/research-portal-harness.git
+git clone https://github.com/ZC-cyber/research-portal-harness.git
 cd research-portal-harness
 bash installer/install.sh
 ```
@@ -55,7 +55,14 @@ Use $research-portal-harness to connect my subscribed research portals.
 The skill can initialize a separate acquisition workspace:
 
 ```bash
+python3 skills/research-portal-harness/scripts/check_environment.py
 python3 skills/research-portal-harness/scripts/init_workspace.py ~/research-portal-workspace
+```
+
+Before running a real Playwright/PDF/Excel acquisition workflow, use the stricter runtime check:
+
+```bash
+python3 skills/research-portal-harness/scripts/check_environment.py --strict-runtime
 ```
 
 Use `examples/brokers.example.json` and `examples/tasks.example.json` as sanitized starting points. Do not commit real browser profiles, downloaded research, personal manifests, or session-bearing URLs.
