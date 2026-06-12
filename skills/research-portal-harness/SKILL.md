@@ -16,6 +16,7 @@ This skill guides a local, user-controlled acquisition workflow for research mat
 - Configure portal recipes for search, download, exclusion rules, rate limits, and login validation.
 - Download entitled PDFs, Excel models, transcripts, and other research files.
 - Dedupe files by hash, keep manifests, index metadata, and export artifacts for downstream research agents.
+- Use the bundled `rph` execution CLI when it is installed in the local Python environment.
 
 ## What This Skill Must Not Do
 
@@ -90,7 +91,18 @@ Ask the user to paste the official login URL for a portal if the recipe does not
 When this skill is used inside an existing acquisition workspace, prefer its local scripts and config:
 
 ```bash
-python3 -m pip install -e ".[dev]"
+rph init <workspace>
+rph add-portal <portal_id> --name "<Portal Name>" --login-url "<official_url>" --allowed-domain "<domain>" --workspace <workspace>
+rph login <portal_id> --workspace <workspace>
+rph search <portal_id> --task <task_id> --workspace <workspace>
+rph fetch <portal_id> --task <task_id> --workspace <workspace> --max-downloads 10
+rph index --task <task_id> --workspace <workspace>
+rph status --task <task_id> --workspace <workspace>
+```
+
+If an older workspace has custom scripts, prefer them when they already encode portal-specific logic:
+
+```bash
 python3 -m playwright install chromium
 python3 scripts/fetch_task.py <task_id> --brokers <portal_id> --login-only
 python3 scripts/fetch_task.py <task_id> --brokers <portal_id>
@@ -99,3 +111,5 @@ python3 scripts/status_report.py <task_id>
 ```
 
 Use the workspace's existing `config/brokers.json`, `config/tasks.json`, `data/state/`, `data/raw/`, `data/indexes/`, and manifest patterns instead of inventing a parallel structure.
+
+The bundled generic downloader is link-based. If a portal hides materials behind viewer APIs, JavaScript-only buttons, or entitlement-specific document endpoints, create a portal-specific extension rather than bypassing controls.

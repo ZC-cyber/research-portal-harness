@@ -43,7 +43,16 @@ source .venv/bin/activate
 For an existing Python acquisition workspace with its own `pyproject.toml`, install editable dependencies from that workspace root:
 
 ```bash
+python3 -m pip install --upgrade pip
 python3 -m pip install -e ".[dev]"
+```
+
+For this repository's bundled execution layer:
+
+```bash
+python3 -m pip install --upgrade pip
+python3 -m pip install -e ".[dev]"
+python3 -m playwright install chromium
 ```
 
 ## 3. Initialize Workspace
@@ -51,7 +60,7 @@ python3 -m pip install -e ".[dev]"
 For a standalone workspace:
 
 ```bash
-python3 skills/research-portal-harness/scripts/init_workspace.py ~/research-portal-workspace
+rph init ~/research-portal-workspace
 ```
 
 For the existing repo, use the current repo root and preserve existing `config/`, `data/`, and `scripts/`.
@@ -91,6 +100,20 @@ Search first and show candidates. Include:
 
 Ask the user before bulk download if the result set looks noisy or unexpectedly large.
 
+CLI:
+
+```bash
+rph search <portal_id> --task <task_id> --workspace <workspace>
+```
+
 ## 7. Fetch, Dedupe, Index, Export
 
 Download conservatively. Keep a manifest with source URL, title, portal, local path, SHA256, size, and downloaded timestamp. Index after fetch. Export only when the user asks or the repo's workflow expects it.
+
+CLI:
+
+```bash
+rph fetch <portal_id> --task <task_id> --workspace <workspace> --max-downloads 10
+rph index --task <task_id> --workspace <workspace>
+rph status --task <task_id> --workspace <workspace>
+```

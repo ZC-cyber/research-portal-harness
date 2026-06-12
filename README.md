@@ -30,12 +30,20 @@ Data platforms:
 
 ## Install
 
-Codex:
+Install the skill:
 
 ```bash
 git clone https://github.com/ZC-cyber/research-portal-harness.git
 cd research-portal-harness
 bash installer/install.sh
+```
+
+Install the execution CLI:
+
+```bash
+python3 -m pip install --upgrade pip
+python3 -m pip install -e ".[dev]"
+python3 -m playwright install chromium
 ```
 
 Claude Code:
@@ -56,7 +64,7 @@ The skill can initialize a separate acquisition workspace:
 
 ```bash
 python3 skills/research-portal-harness/scripts/check_environment.py
-python3 skills/research-portal-harness/scripts/init_workspace.py ~/research-portal-workspace
+rph init ~/research-portal-workspace
 ```
 
 Before running a real Playwright/PDF/Excel acquisition workflow, use the stricter runtime check:
@@ -64,6 +72,37 @@ Before running a real Playwright/PDF/Excel acquisition workflow, use the stricte
 ```bash
 python3 skills/research-portal-harness/scripts/check_environment.py --strict-runtime
 ```
+
+## Execution CLI
+
+The first execution layer is intentionally local and conservative. It can:
+
+- create workspace config and state directories
+- add portal recipes
+- open a visible browser for manual login and 2FA
+- discover candidate report/model/data links from allowed domains
+- batch download PDFs, Excel models, CSV/JSON/ZIP exports
+- dedupe by URL and SHA256
+- build a basic JSONL index with PDF text previews and Excel sheet metadata
+- report manifest and index status
+
+Example:
+
+```bash
+rph init ~/research-portal-workspace
+rph add-portal bernstein_research \
+  --name "Bernstein Research" \
+  --login-url "https://research.example.com/login" \
+  --allowed-domain "example.com" \
+  --workspace ~/research-portal-workspace
+rph login bernstein_research --workspace ~/research-portal-workspace
+rph search bernstein_research --task example_research_task --workspace ~/research-portal-workspace
+rph fetch bernstein_research --task example_research_task --workspace ~/research-portal-workspace --max-downloads 10
+rph index --task example_research_task --workspace ~/research-portal-workspace
+rph status --task example_research_task --workspace ~/research-portal-workspace
+```
+
+This generic downloader is link-based. Portals that hide downloads behind viewer APIs, JavaScript-only buttons, or entitlement-specific document endpoints may need portal-specific recipe extensions.
 
 Use `examples/brokers.example.json` and `examples/tasks.example.json` as sanitized starting points. Do not commit real browser profiles, downloaded research, personal manifests, or session-bearing URLs.
 
@@ -79,6 +118,8 @@ Use `examples/brokers.example.json` and `examples/tasks.example.json` as sanitiz
 
 ```text
 skills/research-portal-harness/   # Skill package for Codex / Claude Code
+src/research_portal_harness/       # Local execution CLI and library
+tests/                             # Safety and smoke tests
 examples/                         # Sanitized example configs
 installer/install.sh              # Copies the skill into ~/.codex/skills or another target
 ```

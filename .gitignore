@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+*.egg-info/
 
 # Local harness runtime state. Do not commit user data or sessions.
 data/
@@ -26,4 +27,3 @@ config/*.json
 *.xlsm
 *.csv
 *.zip
-
