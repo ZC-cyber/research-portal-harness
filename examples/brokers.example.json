@@ -1,0 +1,56 @@
+{
+  "browser_profile_dir": "data/state/browser_profiles",
+  "download_manifest": "data/state/manifests/download_manifest.json",
+  "headless": false,
+  "manual_login_timeout_ms": 300000,
+  "max_downloads_per_run": 50,
+  "file_extensions": [".pdf", ".xls", ".xlsx", ".xlsm", ".csv", ".zip", ".json"],
+  "brokers": [
+    {
+      "id": "bernstein_research",
+      "name": "Bernstein Research",
+      "allowed_domains": [],
+      "start_urls": [],
+      "manual_login": true,
+      "enabled": false,
+      "auth_pending_url_patterns": ["login", "signin", "sso", "mfa"],
+      "auth_success_url_patterns": [],
+      "auth_success_selectors": [],
+      "research_search": {
+        "enabled": true,
+        "date_range_days": 730,
+        "max_reports_per_company": 10,
+        "max_reports_per_industry_term": 10
+      },
+      "download_selectors": [
+        "a[download]",
+        "a[href*='download' i]",
+        "a[href*='pdf' i]",
+        "button:has-text('Download')",
+        "button:has-text('PDF')",
+        "button:has-text('Excel')"
+      ],
+      "exclude_url_patterns": ["privacy", "terms", "logout", "support"],
+      "exclude_title_patterns": ["Research Directory", "Terms of Use", "Privacy"]
+    },
+    {
+      "id": "capital_iq_pro",
+      "name": "Capital IQ Pro",
+      "allowed_domains": [],
+      "start_urls": [],
+      "manual_login": true,
+      "enabled": false,
+      "auth_pending_url_patterns": ["login", "signin", "sso", "mfa"],
+      "auth_success_url_patterns": [],
+      "auth_success_selectors": [],
+      "document_search": {
+        "enabled": true,
+        "date_range_days": 730,
+        "page_size": 20,
+        "max_pages": 2,
+        "max_per_term": 8
+      }
+    }
+  ]
+}
+
